@@ -1,0 +1,297 @@
+<html>
+ 
+    <head>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    </head>
+ 
+    <body>
+        <section>
+            <div class="container">
+                <div class="row">
+                    <div class="col text-center mt-3">
+                        <h3>LOGIN</h3>
+                    </div>
+                </div>
+                <div class="row justify-content-center mt-5" id="form">
+                    <div class="col-3" style="background-color: #FAEBD7;">
+                        <form id="formulario" >
+                            <div class="form-group">
+                                <label id="primeroLabel">Usuario</label>
+                                <input type="text" class="form-control" id="primero">
+                                <div class="alert alert-danger" id="diverror1">
+                                    <div id="error1"></div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="segundoLabel">Contrasea</label>
+                                <input type="password" class="form-control" id="segundo">
+                                <div class="alert alert-danger" id="diverror2">
+                                    <div id="error2"></div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <div class="row justify-content-center mt-5"><div class="jumbotron" id="jumbo"><h3 id="welcome"></h3></div></div>
+                <div class="row justify-content-center mt-5" style=" position: relative; bottom:40px">
+                    <button type="button" class="btn btn-primary ml-1" id="loggearse">Login</button>
+                    <button type="button" class="btn btn-secondary ml-1" id="check">Check</button>
+                    
+                    <button type="button" class="btn btn-danger ml-1" id="logout">Logout</button>
+                    <button type="reset" class="btn btn-warning ml-1" id="limpiar">Limpiar</button>
+                </div>
+                <div class="row justify-content-center">
+                
+                <button type="button" class="btn btn-info ml-1" id="secret">Secreto</button>&nbsp;
+                <input type="text" id="secr" readonly>
+                </div>
+                <div class="row">
+                    <div class="col text-center mt-3" id="tituloError">
+                        <div class="alert alert-danger" role="alert">
+                            <h4 class="alert-heading" id="tituloResultadoError"></h4>
+                            <hr>
+                            <p class="mb-0" id="resultadoOperacionError"></p>
+                            <hr>
+                            <h4 class="alert-heading" id="tituloResultadoError">Parámetros:</h4>
+                            <p class="mb-0" id="resultadoParametrosError"></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col text-center mt-3" id="titulo">
+                        <div class="alert alert-success" role="alert">
+                            <h4 class="alert-heading" id="tituloResultado"></h4>
+                            <hr>
+                            <p class="mb-0" id="resultadoOperacion"></p>
+                            <hr>
+                            <h4 class="alert-heading" >Parámetros:</h4>
+                            <p class="mb-0" id="resultadoParametros"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <script>
+            //Activar o desactivar boton
+            var enviarPrimero = false;
+            var enviarSegundo = false;
+            var enviarAccion = false;
+ 
+            var datos_fila = '';
+            var fila;
+            var mensaje;
+            //Variables del option
+            var indice;
+            var accion;
+ 
+            var regex = new RegExp("^[a-zA-Z1-9]*$");
+ 
+            //Escondo los divs de errores
+            $("#diverror1").hide();
+            $("#diverror2").hide();
+            $("#diverror3").hide();
+            $("#divErrorJava").hide();
+            $("#jumbo").hide();
+            //Document ready
+            $(document).ready(function () {
+                $("#loggearse").attr("disabled", true);
+ 
+                //Desabilito el titulo de resultado
+                $("#titulo").hide();
+                $("#tituloError").hide();
+ 
+                //Como la funcion keyup solo acepta clases he tendipo que buscar esta otra forma para que
+                //la funcion keyup se trague los id en vez de las clases
+                //+info: https://stackoverflow.com/questions/4655376/jquery-bind-keyup-to-body-in-firefox
+                $("body").on('keyup', "#primero", validarPrimero);
+                $("body").on('keyup', "#segundo", validarSegundo);
+ 
+                //Funcion que me muestra los mensajes de error debajo de cada input
+                function mensajes(error, div, mensaje) {
+                    $(`#${error}`).empty().append(mensaje);
+                    $(`#${div}`).show();
+                }
+                //Metodo de validacion del input primero
+                function validarPrimero() {
+                    enviarPrimero = false;
+ 
+                    $("#error1").empty();
+                    $("#diverror1").hide();
+                    primero = $("#primero").val();
+                    if (primero.length == 0) {
+                        mensajes('error1', 'diverror1', 'Introduce tu nombre de usuario');
+                    } else if (!regex.test(primero)) {
+                        mensajes('error1', 'diverror1', 'Caracteres espciales o espacios en blanco no aceptados');
+                    } else {
+                        enviarPrimero = true;
+                    }
+                    desabilitarBoton();
+                }
+ 
+                //Metodo de validacion del segundo
+                function validarSegundo() {
+                    enviarSegundo = false;
+ 
+                    $("#error2").empty();
+                    $("#diverror2").hide();
+                    segundo = $("#segundo").val();
+ 
+                    if (segundo.length == 0) {
+                        mensajes('error2', 'diverror2', 'Introduce tu contraseña');
+                    } else if (!regex.test(segundo)) {
+                        mensajes('error2', 'diverror2', 'Caracteres espciales o espacios en blanco no aceptados');
+                    } else {
+                        enviarSegundo = true;
+                    }
+                    desabilitarBoton();
+                }
+ 
+ 
+                //Funcion para desabilitar el boton enviar
+                function desabilitarBoton() {
+                    if (enviarPrimero == true && enviarSegundo == true) {
+                        $("#loggearse").attr("disabled", false);
+                    } else {
+                        $("#loggearse").attr("disabled", true);
+                    }
+ 
+                }
+ 
+                $("#loggearse").click(function () {
+                    $.ajax({
+                        url: `c3p0?op=loggin&user=${primero}&pass=${segundo}`,
+                        dataType: "json",
+                        method: "GET",
+                        success: function (data) {
+                            cargaResultado(data);
+                            $('#formulario').hide();
+                            $('#welcome').empty();
+                            $('#jumbo').show();
+                            $('#welcome').append(`Bienvenido, ${primero}`);
+                        },
+                        error: function (data) {
+                            errorServer(data);
+                        }
+                    });
+                });
+                $("#check").click(function () {
+                    $.ajax({
+                        url: `c3p0?op=check`,
+                        dataType: "json",
+                        method: "GET",
+                        success: function (data) {
+                            cargaResultado(data);
+                        },
+                        error: function (data) {
+                            errorServer(data);
+                        }
+                    });
+                });
+                $("#secret").click(function () {
+                    $.ajax({
+                        url: `c3p0?op=secret`,
+                        dataType: "json",
+                        method: "GET",
+                        success: function (data) {
+                            mostrarSecreto(data);
+                        },
+                        error: function (data) {
+                            errorServer(data);
+                        }
+                    });
+                });
+                $("#logout").click(function () {
+                    $.ajax({
+                        url: `c3p0?op=logout`,
+                        dataType: "json",
+                        method: "GET",
+                        success: function (data) {
+                            cargaResultado(data);
+                            $("#primero").val('');
+                            $("#segundo").val('');
+                            $("#secr").val('');
+                            $('#formulario').show();
+                            $('#jumbo').hide();
+                        },
+                        error: function (data) {
+                            errorServer(data);
+                        }
+                    });
+                });
+ 
+ 
+                //Cargo los datos del json en la tabla
+                function cargaResultado(data) {
+                    $("#tituloError").hide();
+                    $("#titulo").show();
+ 
+                    $("#resultadoOperacion").empty().append(data.msg);
+                    $("#tituloResultado").empty().append(`Status: ${data.status}`);
+                    var params = '';
+                    Object.keys(data.params).forEach(function (key) {
+                        params = `${params} <br /> ${key} = ${data.params[key]}`;
+                    });
+                    $("#resultadoParametros").empty().append(params);
+ 
+ 
+                }
+                ;
+                //Resultado de mostrar secreto
+                function mostrarSecreto(data) {
+                    $("#tituloError").hide();
+                    $("#titulo").show();
+                    $("#secr").empty().val(data.msg);
+                    $("#resultadoOperacion").empty().append("Secreto mostrado");
+                    $("#tituloResultado").empty().append(`Status: ${data.status}`);
+                    var params = '';
+                    Object.keys(data.params).forEach(function (key) {
+                        params = `${params} <br /> ${key} = ${data.params[key]}`;
+                    });
+                    $("#resultadoParametros").empty().append(params);
+ 
+ 
+                }
+                ;
+ 
+                //Errores del server
+                function errorServer(data) {
+                    $("#titulo").hide();
+                    $("#tituloError").show();
+ 
+                    $("#resultadoOperacionError").empty().append(data.responseJSON.msg);
+                    $("#tituloResultadoError").empty().append(`Status: ${data.responseJSON.status}`);
+                    $("#resultadoParametrosError").hide();
+                    $("#tituloParamsError").hide();
+                    var params = '';
+                    Object.keys(data.responseJSON.params).forEach(function (key) {
+                        params = `${params} <br /> ${key} = ${data.responseJSON.params[key]}`;
+                    });
+                    $("#resultadoParametrosError").show().empty().append(params);
+                }
+ 
+                //Limpiar la tabla
+                $("#limpiar").click(function () {
+                    $("#titulo").hide();
+                    $("#tituloError").hide();
+                    $("#primero").val('');
+                    $("#segundo").val('');
+                    $("#secr").val('');
+                    $("#diverror1").hide();
+                    $("#diverror2").hide();
+                    $("#divErrorJava").hide();
+                    $("#opcionAccion").val(0);
+                    enviarPrimero = false;
+                    desabilitarBoton();
+                    $(':input', '#form')
+                            .not(':button, :submit, :reset, :hidden')
+                            .val('')
+                            .removeAttr('checked')
+                            .removeAttr('selected');
+ 
+                });
+            });
+        </script>
+    </body>
+ 
+</html>
